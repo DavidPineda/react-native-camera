@@ -322,6 +322,27 @@ export default class Camera extends React.Component<PropsType, StateType> {
     return await CameraManager.getAvailablePictureSizes(this.props.ratio, this._cameraHandle);
   };
 
+  async areAndroidPermissionsGranted() {
+    const hasVideoAndAudio = this.props.captureAudio;
+    const isAuthorized = await requestPermissions(
+      hasVideoAndAudio,
+      CameraManager,
+      this.props.permissionDialogTitle,
+      this.props.permissionDialogMessage,
+    );
+    return isAuthorized;
+  }
+
+   async refreshAuthorizationStatus() {
+    if (this._isMounted === false) {
+      return;
+    }
+    const isAuthorized = await this.areAndroidPermissionsGranted();
+    if (this.state.isAuthorized !== isAuthorized) {
+      this.setState({ isAuthorized, isAuthorizationChecked: true });
+    }
+  }
+
   async recordAsync(options?: RecordingOptions) {
     if (!options || typeof options !== 'object') {
       options = {};
